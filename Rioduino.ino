@@ -8,8 +8,6 @@
 
 SoftwareSerial sonarSerial(rxPin, txPin, true);
 
-unsigned long previousMillis = 0;
-
 Pixy pixy;
 
 int visionTargetCoord;
@@ -37,57 +35,51 @@ void setup() {
 }
 
 void loop() {
-  unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= 10) {
-    previousMillis = currentMillis;
-
-    int numBlocks = pixy.getBlocks();
-    //Serial.println((String) "numBlocks: " + numBlocks);
-    if (numBlocks > 0) {
-      visionTargetCoord = -2;
-      powerCubeWidth = 0;
-      powerCubeHeight = 0;
-      powerCubeCoord = 0;
-      for (int i = 0; i < numBlocks; i++) {
-        //Serial.println((String) i + ": " + pixy.blocks[i].signature);
-        if (pixy.blocks[i].signature == 1) { //Vision target
-          visionTargetCoord += pixy.blocks[i].x;
-        } else if (pixy.blocks[i].signature == 2)  { //Power cube
-          if (pixy.blocks[i].width > powerCubeWidth) { //We want the biggest one
-            //Serial.println((String) "Width: " + pixy.blocks[i].width);
-            powerCubeWidth = pixy.blocks[i].width;
-            powerCubeHeight = pixy.blocks[i].height;
-            powerCubeCoord = pixy.blocks[i].x;
-          }
+  int numBlocks = pixy.getBlocks();
+  //Serial.println((String) "numBlocks: " + numBlocks);
+  if (numBlocks > 0) {
+    visionTargetCoord = -2;
+    powerCubeWidth = 0;
+    powerCubeHeight = 0;
+    powerCubeCoord = 0;
+    for (int i = 0; i < numBlocks; i++) {
+      //Serial.println((String) i + ": " + pixy.blocks[i].signature);
+      if (pixy.blocks[i].signature == 1) { //Vision target
+        visionTargetCoord += pixy.blocks[i].x;
+      } else if (pixy.blocks[i].signature == 2)  { //Power cube
+        if (pixy.blocks[i].width > powerCubeWidth) { //We want the biggest one
+          //Serial.println((String) "Width: " + pixy.blocks[i].width);
+          powerCubeWidth = pixy.blocks[i].width;
+          powerCubeHeight = pixy.blocks[i].height;
+          powerCubeCoord = pixy.blocks[i].x;
         }
       }
-      visionTargetCoord = visionTargetCoord / 2; //There should always be 2 of them
     }
+    visionTargetCoord = visionTargetCoord / 2; //There should always be 2 of them
+  }
 
-    boolean msgComplete = false;
-    int index = 0;
-    char buff[5];
-    sonarSerial.flush();
-    while (!msgComplete) {
-      if (sonarSerial.available()) {
-        char headerByte = sonarSerial.read();
-        if (headerByte == 'R') {
-          while (index < 4) {
-            if (sonarSerial.available()) {
-              buff[index] = sonarSerial.read();
-              index++;
-            }
+  boolean msgComplete = false;
+  int index = 0;
+  char buff[5];
+  sonarSerial.flush();
+  while (!msgComplete) {
+    if (sonarSerial.available()) {
+      char headerByte = sonarSerial.read();
+      if (headerByte == 'R') {
+        while (index < 4) {
+          if (sonarSerial.available()) {
+            buff[index] = sonarSerial.read();
+            index++;
           }
-          buff[index] = 0x00;
         }
-        headerByte = 0;
-        index = 0;
-        msgComplete = true;
-        rangedDistance = atoi(buff);
-        //Serial.println((String) "rangedDistance: " + rangedDistance);
+        buff[index] = 0x00;
       }
+      headerByte = 0;
+      index = 0;
+      msgComplete = true;
+      rangedDistance = atoi(buff);
+      //Serial.println((String) "rangedDistance: " + rangedDistance);
     }
-
   }
 }
 
