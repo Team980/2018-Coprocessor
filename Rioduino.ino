@@ -38,6 +38,7 @@ void loop() {
   int numBlocks = pixy.getBlocks();
   //Serial.println((String) "numBlocks: " + numBlocks);
   if (numBlocks > 0) {
+    int visionTargetWidth = 0;
     visionTargetCoord = -2;
     powerCubeWidth = 0;
     powerCubeHeight = 0;
@@ -45,7 +46,10 @@ void loop() {
     for (int i = 0; i < numBlocks; i++) {
       //Serial.println((String) i + ": " + pixy.blocks[i].signature);
       if (pixy.blocks[i].signature == 1) { //Vision target
-        visionTargetCoord += pixy.blocks[i].x;
+        if (pixy.blocks[i].width > visionTargetWidth) { //We want the biggest one
+        visionTargetWidth = pixy.blocks[i].width;
+        visionTargetCoord = pixy.blocks[i].x;
+        }
       } else if (pixy.blocks[i].signature == 2)  { //Power cube
         if (pixy.blocks[i].width > powerCubeWidth) { //We want the biggest one
           //Serial.println((String) "Width: " + pixy.blocks[i].width);
@@ -55,8 +59,7 @@ void loop() {
         }
       }
     }
-    visionTargetCoord = visionTargetCoord / 2; //There should always be 2 of them
-  }
+    }
 
   boolean msgComplete = false;
   int index = 0;
