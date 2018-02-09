@@ -47,8 +47,8 @@ void loop() {
       //Serial.println((String) i + ": " + pixy.blocks[i].signature);
       if (pixy.blocks[i].signature == 1) { //Vision target
         if (pixy.blocks[i].width > visionTargetWidth) { //We want the biggest one
-        visionTargetWidth = pixy.blocks[i].width;
-        visionTargetCoord = pixy.blocks[i].x;
+          visionTargetWidth = pixy.blocks[i].width;
+          visionTargetCoord = pixy.blocks[i].x;
         }
       } else if (pixy.blocks[i].signature == 2)  { //Power cube
         if (pixy.blocks[i].width > powerCubeWidth) { //We want the biggest one
@@ -59,7 +59,7 @@ void loop() {
         }
       }
     }
-    }
+  }
 
   boolean msgComplete = false;
   int index = 0;
