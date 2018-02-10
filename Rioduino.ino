@@ -38,21 +38,19 @@ void loop() {
   int numBlocks = pixy.getBlocks();
   //Serial.println((String) "numBlocks: " + numBlocks);
   if (numBlocks > 0) {
-    int visionTargetWidth = 0;
-    visionTargetCoord = -2;
-    powerCubeWidth = 0;
-    powerCubeHeight = 0;
-    powerCubeCoord = 0;
+    int tmp_visionTargetWidth = 0;
+    int tmp_powerCubeWidth = 0;
     for (int i = 0; i < numBlocks; i++) {
       //Serial.println((String) i + ": " + pixy.blocks[i].signature);
       if (pixy.blocks[i].signature == 1) { //Vision target
-        if (pixy.blocks[i].width > visionTargetWidth) { //We want the biggest one
-          visionTargetWidth = pixy.blocks[i].width;
+        if (pixy.blocks[i].width > tmp_visionTargetWidth) { //We want the biggest one
+          tmp_visionTargetWidth = pixy.blocks[i].width;
           visionTargetCoord = pixy.blocks[i].x;
         }
       } else if (pixy.blocks[i].signature == 2)  { //Power cube
-        if (pixy.blocks[i].width > powerCubeWidth) { //We want the biggest one
+        if (pixy.blocks[i].width > tmp_powerCubeWidth) { //We want the biggest one
           //Serial.println((String) "Width: " + pixy.blocks[i].width);
+          tmp_powerCubeWidth = pixy.blocks[i].width;
           powerCubeWidth = pixy.blocks[i].width;
           powerCubeHeight = pixy.blocks[i].height;
           powerCubeCoord = pixy.blocks[i].x;
