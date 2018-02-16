@@ -1,34 +1,42 @@
 #include <SPI.h>
+
 #include <Pixy.h>
+#include <TFMini.h>
+
 #include <Wire.h>
 #include <SoftwareSerial.h>
 
-#define rxPin 2
-#define txPin 3
-
-SoftwareSerial sonarSerial(rxPin, txPin, true);
-
 Pixy pixy;
+
+//SoftwareSerial sonarSerial(2, 3, true);
+
+TFMini tfMini;
+SoftwareSerial lidarSerial(4, 5);
 
 int visionTargetCoord;
 int powerCubeWidth;
 int powerCubeHeight;
 int powerCubeCoord;
-int rangedDistance;
+int sonarDistance;
+int lidarDistance;
 
 void setup() {
   visionTargetCoord = -2;
   powerCubeWidth = 0;
   powerCubeHeight = 0;
-  powerCubeCoord = 0;
-  rangedDistance = 0;
+  powerCubeCoord = -2;
+  sonarDistance = 0;
+  lidarDistance = 0;
 
   Wire.begin(4);
   Wire.onRequest(requestEvent);
 
   pixy.init();
 
-  sonarSerial.begin(9600);
+  //sonarSerial.begin(9600);
+
+  lidarSerial.begin(115200);
+  tfMini.begin(&lidarSerial);
 
   Serial.begin(115200);
   Serial.println("Starting...");
@@ -36,12 +44,12 @@ void setup() {
 
 void loop() {
   int numBlocks = pixy.getBlocks();
-  //Serial.println((String) "numBlocks: " + numBlocks);
+  Serial.println((String) "numBlocks: " + numBlocks);
   if (numBlocks > 0) {
     int tmp_visionTargetWidth = 0;
     int tmp_powerCubeWidth = 0;
     for (int i = 0; i < numBlocks; i++) {
-      //Serial.println((String) i + ": " + pixy.blocks[i].signature);
+      Serial.println((String) i + ": " + pixy.blocks[i].signature);
       if (pixy.blocks[i].signature == 1) { //Vision target
         if (pixy.blocks[i].width > tmp_visionTargetWidth) { //We want the biggest one
           tmp_visionTargetWidth = pixy.blocks[i].width;
@@ -49,7 +57,7 @@ void loop() {
         }
       } else if (pixy.blocks[i].signature == 2)  { //Power cube
         if (pixy.blocks[i].width > tmp_powerCubeWidth) { //We want the biggest one
-          //Serial.println((String) "Width: " + pixy.blocks[i].width);
+          Serial.println((String) "Width: " + pixy.blocks[i].width);
           tmp_powerCubeWidth = pixy.blocks[i].width;
           powerCubeWidth = pixy.blocks[i].width;
           powerCubeHeight = pixy.blocks[i].height;
@@ -59,9 +67,10 @@ void loop() {
     }
   }
 
-  boolean msgComplete = false;
+  /*boolean msgComplete = false;
   int index = 0;
   char buff[5];
+  sonarSerial.listen();
   sonarSerial.flush();
   while (!msgComplete) {
     if (sonarSerial.available()) {
@@ -78,14 +87,18 @@ void loop() {
       headerByte = 0;
       index = 0;
       msgComplete = true;
-      rangedDistance = atoi(buff);
-      //Serial.println((String) "rangedDistance: " + rangedDistance);
+      sonarDistance = atoi(buff);
+      Serial.println((String) "sonarDistance: " + sonarDistance);
     }
-  }
+  }*/
+
+  lidarSerial.listen();
+  lidarDistance = tfMini.getDistance(); //it's so simple xD
+  Serial.println((String) "lidarDistance: " + lidarDistance);
 }
 
 void requestEvent() {
-  byte buff[20];
+  byte buff[24];
 
   buff[0] = visionTargetCoord >> 24;
   buff[1] = visionTargetCoord >> 16;
@@ -107,12 +120,18 @@ void requestEvent() {
   buff[14] = powerCubeCoord >> 8;
   buff[15] = powerCubeCoord;
 
-  buff[16] = rangedDistance >> 24;
-  buff[17] = rangedDistance >> 16;
-  buff[18] = rangedDistance >> 8;
-  buff[19] = rangedDistance;
+  buff[16] = sonarDistance >> 24;
+  buff[17] = sonarDistance >> 16;
+  buff[18] = sonarDistance >> 8;
+  buff[19] = sonarDistance;
 
-  Wire.write(buff, 20);
+  buff[20] = lidarDistance >> 24;
+  buff[21] = lidarDistance >> 16;
+  buff[22] = lidarDistance >> 8;
+  buff[23] = lidarDistance;
+
+  Wire.write(buff, 24);
 }
+
 
 
