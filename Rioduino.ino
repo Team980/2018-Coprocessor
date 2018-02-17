@@ -1,17 +1,16 @@
 #include <SPI.h>
 
 #include <Pixy.h>
-#include <TFMini.h>
+#include "TFMini.h"
 
 #include <Wire.h>
 #include <SoftwareSerial.h>
 
 Pixy pixy;
 
-//SoftwareSerial sonarSerial(2, 3, true);
+SoftwareSerial sonarSerial(4, 5, true);
 
 TFMini tfMini;
-SoftwareSerial lidarSerial(4, 5);
 
 int visionTargetCoord;
 int powerCubeWidth;
@@ -33,31 +32,32 @@ void setup() {
 
   pixy.init();
 
-  //sonarSerial.begin(9600);
+  sonarSerial.begin(9600);
 
-  lidarSerial.begin(115200);
-  tfMini.begin(&lidarSerial);
+  Serial.begin(115200); //lidar
+  tfMini.begin(&Serial);
 
-  Serial.begin(115200);
-  Serial.println("Starting...");
+  //Serial.begin(115200);
+  //Serial.println("Starting...");
 }
 
 void loop() {
   int numBlocks = pixy.getBlocks();
-  Serial.println((String) "numBlocks: " + numBlocks);
+  //Serial.println((String) "numBlocks: " + numBlocks);
   if (numBlocks > 0) {
     int tmp_visionTargetWidth = 0;
     int tmp_powerCubeWidth = 0;
     for (int i = 0; i < numBlocks; i++) {
-      Serial.println((String) i + ": " + pixy.blocks[i].signature);
+      //Serial.println((String) i + ": " + pixy.blocks[i].signature);
       if (pixy.blocks[i].signature == 1) { //Vision target
         if (pixy.blocks[i].width > tmp_visionTargetWidth) { //We want the biggest one
           tmp_visionTargetWidth = pixy.blocks[i].width;
           visionTargetCoord = pixy.blocks[i].x;
         }
-      } else if (pixy.blocks[i].signature == 2)  { //Power cube
+      } else if (pixy.blocks[i].signature == 2 || pixy.blocks[i].signature == 3
+                 || pixy.blocks[i].signature == 4)  { //Power cubes at different ranges, plus mustard
         if (pixy.blocks[i].width > tmp_powerCubeWidth) { //We want the biggest one
-          Serial.println((String) "Width: " + pixy.blocks[i].width);
+          //Serial.println((String) "Width: " + pixy.blocks[i].width);
           tmp_powerCubeWidth = pixy.blocks[i].width;
           powerCubeWidth = pixy.blocks[i].width;
           powerCubeHeight = pixy.blocks[i].height;
@@ -67,10 +67,9 @@ void loop() {
     }
   }
 
-  /*boolean msgComplete = false;
+  boolean msgComplete = false;
   int index = 0;
   char buff[5];
-  sonarSerial.listen();
   sonarSerial.flush();
   while (!msgComplete) {
     if (sonarSerial.available()) {
@@ -88,13 +87,12 @@ void loop() {
       index = 0;
       msgComplete = true;
       sonarDistance = atoi(buff);
-      Serial.println((String) "sonarDistance: " + sonarDistance);
+      //Serial.println((String) "sonarDistance: " + sonarDistance);
     }
-  }*/
+  }
 
-  lidarSerial.listen();
   lidarDistance = tfMini.getDistance(); //it's so simple xD
-  Serial.println((String) "lidarDistance: " + lidarDistance);
+  //Serial.println((String) "lidarDistance: " + lidarDistance);
 }
 
 void requestEvent() {
