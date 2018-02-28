@@ -75,7 +75,7 @@ void loop() {
     if (sonarSerial.available()) {
       char headerByte = sonarSerial.read();
       if (headerByte == 'R') {
-        while (index < 4) {
+        while (index < 3) {
           if (sonarSerial.available()) {
             buff[index] = sonarSerial.read();
             index++;
