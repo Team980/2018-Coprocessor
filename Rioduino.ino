@@ -1,7 +1,7 @@
 #include <SPI.h>
 
 #include <Pixy.h>
-#include "TFMini.h"
+//#include "TFMini.h"
 
 #include <Wire.h>
 #include <SoftwareSerial.h>
@@ -10,7 +10,7 @@ Pixy pixy;
 
 SoftwareSerial sonarSerial(4, 5, true);
 
-TFMini tfMini;
+//TFMini tfMini;
 
 int visionTargetCoord;
 int powerCubeWidth;
@@ -34,8 +34,8 @@ void setup() {
 
   sonarSerial.begin(9600);
 
-  Serial.begin(115200); //lidar
-  tfMini.begin(&Serial);
+  //Serial.begin(115200); //lidar
+  //tfMini.begin(&Serial);
 
   //Serial.begin(115200);
   //Serial.println("Starting...");
@@ -91,7 +91,7 @@ void loop() {
     }
   }
 
-  lidarDistance = tfMini.getDistance(); //it's so simple xD
+  //lidarDistance = tfMini.getDistance(); //it's so simple xD
   //Serial.println((String) "lidarDistance: " + lidarDistance);
 }
 
