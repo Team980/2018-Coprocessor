@@ -17,7 +17,7 @@ int powerCubeWidth;
 int powerCubeHeight;
 int powerCubeCoord;
 int sonarDistance;
-int lidarDistance;
+//int lidarDistance;
 
 void setup() {
   visionTargetCoord = -2;
@@ -25,7 +25,7 @@ void setup() {
   powerCubeHeight = 0;
   powerCubeCoord = -2;
   sonarDistance = 0;
-  lidarDistance = 0;
+  //lidarDistance = 0;
 
   Wire.begin(4);
   Wire.onRequest(requestEvent);
@@ -96,7 +96,7 @@ void loop() {
 }
 
 void requestEvent() {
-  byte buff[24];
+  byte buff[20];
 
   buff[0] = visionTargetCoord >> 24;
   buff[1] = visionTargetCoord >> 16;
@@ -123,13 +123,10 @@ void requestEvent() {
   buff[18] = sonarDistance >> 8;
   buff[19] = sonarDistance;
 
-  buff[20] = lidarDistance >> 24;
-  buff[21] = lidarDistance >> 16;
-  buff[22] = lidarDistance >> 8;
-  buff[23] = lidarDistance;
+  //buff[20] = lidarDistance >> 24;
+  //buff[21] = lidarDistance >> 16;
+  //buff[22] = lidarDistance >> 8;
+  //buff[23] = lidarDistance;
 
-  Wire.write(buff, 24);
+  Wire.write(buff, 20);
 }
-
-
-
